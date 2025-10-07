@@ -8,13 +8,6 @@ plugins {
     alias(libs.plugins.google.services)
 }
 
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(FileInputStream(localPropertiesFile))
-    }
-}
-
 android {
     namespace = "abdulrahman.ali19.habittracker"
     compileSdk = 36
@@ -45,14 +38,28 @@ android {
         }
     }
 
+    val localProperties = Properties().apply {
+        if (System.getenv("CI") != null) {
+            // load from environment (CI)
+            put("storePassword",System.getenv("storePassword"))
+            put("keyAlias",System.getenv("keyAlias"))
+            put("keyPassword",System.getenv("keyPassword"))
+        } else {
+            // load from local file
+            val localPropertiesFile = rootProject.file("local.properties")
+            if (localPropertiesFile.exists()) {
+                load(FileInputStream(localPropertiesFile))
+            }
+        }
+    }
+
     signingConfigs {
         create("release") {
-            val keystoreFile = localProperties.getProperty("storeFile")
             val keystorePassword = localProperties.getProperty("storePassword")
             val keyAliasValue = localProperties.getProperty("keyAlias")
             val keyPasswordValue = localProperties.getProperty("keyPassword")
 
-            storeFile = keystoreFile?.let { file(it) }
+            storeFile =  file("keystore/release-key.jks")
             storePassword = keystorePassword
             keyAlias = keyAliasValue
             keyPassword = keyPasswordValue

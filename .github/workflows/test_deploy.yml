@@ -51,24 +51,17 @@ jobs:
           mkdir -p keystore
           echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > keystore/release-key.jks
 
-      - name: Setup local.properties
-        run: |
-          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > local.properties
-          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> local.properties
-          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> local.properties
-          echo "storeFile=keystore/release-key.jks" >> local.properties
-
       # This step builds the Android app using Gradle.
       - name: Build selected flavor
+        env:
+          storePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyAlias: ${{ secrets.KEY_ALIAS }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
         run: |
-          # Retrieve the 'flavor' and 'buildType' inputs provided by the user.
           FLAVOR="${{ github.event.inputs.flavor }}"
           BUILD_TYPE="${{ github.event.inputs.buildType }}"
-          # Construct the correct Gradle task name by capitalizing the first letter of the flavor and build type.
-          # For example, if 'flavor' is 'free' and 'buildType' is 'release', the task will be 'assembleFreeRelease'.
           TASK_NAME="assemble$(echo ${FLAVOR^})$(echo ${BUILD_TYPE^})"
           echo "Running Gradle task: $TASK_NAME"
-          # Execute the Gradle build command.
           ./gradlew "$TASK_NAME"
 
       # This step uploads the generated APK to Firebase App Distribution.
