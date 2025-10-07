@@ -59,7 +59,7 @@ android {
             val keyAliasValue = localProperties.getProperty("keyAlias")
             val keyPasswordValue = localProperties.getProperty("keyPassword")
 
-            storeFile =  file("keystore/release-key.jks")
+            storeFile =  file("../keystore/release-key.jks")
             storePassword = keystorePassword
             keyAlias = keyAliasValue
             keyPassword = keyPasswordValue
