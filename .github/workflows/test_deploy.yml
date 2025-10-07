@@ -67,7 +67,7 @@ jobs:
           # The Firebase App ID is selected based on the chosen flavor.
           # If the flavor is 'free', it uses the 'FIREBASE_APP_ID_FREE' secret; otherwise, it uses 'FIREBASE_APP_ID_PRO'.
           appId: ${{ github.event.inputs.flavor == 'free' && secrets.FIREBASE_APP_ID_FREE || secrets.FIREBASE_APP_ID_PRO }}
-          token: ${{ secrets.FIREBASE_TOKEN }}
+          serviceCredentialsFileContent: ${{ secrets.CREDENTIAL_FILE_CONTENT }}
           groups: testers
           # The path to the APK file is constructed dynamically based on the selected flavor and build type.
           file: app/build/outputs/apk/${{ github.event.inputs.flavor }}/${{ github.event.inputs.buildType }}/app-${{ github.event.inputs.flavor }}-${{ github.event.inputs.buildType }}.apk
