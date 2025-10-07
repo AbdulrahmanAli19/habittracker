@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:345681746869:android:4cdee8d944dc85c26d97fc",
+        "mobilesdk_app_id": "1:345681746869:android:84db7a46a3c2765a6d97fc",
         "android_client_info": {
-          "package_name": "abdulrahman.ali19.habittracker"
+          "package_name": "abdulrahman.ali19.habittracker.free"
         }
       },
       "oauth_client": [],
