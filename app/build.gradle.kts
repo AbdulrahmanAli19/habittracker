@@ -1,7 +1,17 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+}
+
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(FileInputStream(localPropertiesFile))
+    }
 }
 
 android {
@@ -34,9 +44,25 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            val keystoreFile = localProperties.getProperty("KEYSTORE_FILE")
+            val keystorePassword = localProperties.getProperty("KEYSTORE_PASSWORD")
+            val keyAliasValue = localProperties.getProperty("KEY_ALIAS")
+            val keyPasswordValue = localProperties.getProperty("KEY_PASSWORD")
+
+            storeFile = keystoreFile?.let { file(it) }
+            storePassword = keystorePassword
+            keyAlias = keyAliasValue
+            keyPassword = keyPasswordValue
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
