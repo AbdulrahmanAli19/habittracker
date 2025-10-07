@@ -1,13 +1,19 @@
+# This is the name of the workflow, which will be displayed in the Actions tab of the GitHub repository.
 name: Build & Deploy to Firebase
 
+# This section defines when the workflow will run.
 on:
+  # 'workflow_dispatch' allows this workflow to be triggered manually from the GitHub UI.
   workflow_dispatch:
+    # 'inputs' define the parameters that a user can provide when manually running the workflow.
     inputs:
+      # 'flavor' is an input for selecting the product flavor of the Android app.
       flavor:
         description: 'Select flavor to build'
         required: true
         default: 'free'
         type: choice
+        # The user can choose between 'free' and 'pro' flavors.
         options:
           - free
           - pro
@@ -16,11 +22,14 @@ on:
         required: true
         default: 'release'
         type: choice
+        # The user can choose between 'debug' and 'release' build types.
         options:
           - debug
           - release
 
+# This section defines the jobs to be executed in the workflow.
 jobs:
+  # 'build' is the only job in this workflow.
   build:
     runs-on: ubuntu-latest
 
@@ -37,13 +46,28 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # This step builds the Android app using Gradle.
       - name: Build selected flavor
-        run: ./gradlew assemble${{ github.event.inputs.flavor | capitalize }}${{ github.event.inputs.buildType | capitalize }}
+        run: |
+          # Retrieve the 'flavor' and 'buildType' inputs provided by the user.
+          FLAVOR="${{ github.event.inputs.flavor }}"
+          BUILD_TYPE="${{ github.event.inputs.buildType }}"
+          # Construct the correct Gradle task name by capitalizing the first letter of the flavor and build type.
+          # For example, if 'flavor' is 'free' and 'buildType' is 'release', the task will be 'assembleFreeRelease'.
+          TASK_NAME="assemble$(echo ${FLAVOR^})$(echo ${BUILD_TYPE^})"
+          echo "Running Gradle task: $TASK_NAME"
+          # Execute the Gradle build command.
+          ./gradlew "$TASK_NAME"
 
+      # This step uploads the generated APK to Firebase App Distribution.
       - name: Upload to Firebase App Distribution
+        # It uses a third-party action 'wzieba/Firebase-Distribution-Github-Action'.
         uses: wzieba/Firebase-Distribution-Github-Action@v1
         with:
-          appId: ${{ secrets.FIREBASE_APP_ID_${{ github.event.inputs.flavor | upper }} }}
+          # The Firebase App ID is selected based on the chosen flavor.
+          # If the flavor is 'free', it uses the 'FIREBASE_APP_ID_FREE' secret; otherwise, it uses 'FIREBASE_APP_ID_PRO'.
+          appId: ${{ github.event.inputs.flavor == 'free' && secrets.FIREBASE_APP_ID_FREE || secrets.FIREBASE_APP_ID_PRO }}
           token: ${{ secrets.FIREBASE_TOKEN }}
           groups: testers
+          # The path to the APK file is constructed dynamically based on the selected flavor and build type.
           file: app/build/outputs/apk/${{ github.event.inputs.flavor }}/${{ github.event.inputs.buildType }}/app-${{ github.event.inputs.flavor }}-${{ github.event.inputs.buildType }}.apk
