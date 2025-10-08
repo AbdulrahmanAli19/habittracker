@@ -41,9 +41,9 @@ android {
     val localProperties = Properties().apply {
         if (System.getenv("CI") != null) {
             // load from environment (CI)
-            put("storePassword",System.getenv("storePassword"))
-            put("keyAlias",System.getenv("keyAlias"))
-            put("keyPassword",System.getenv("keyPassword"))
+            put("storePassword",System.getenv("KEYSTORE_PASSWORD"))
+            put("keyAlias",System.getenv("KEY_ALIAS"))
+            put("keyPassword",System.getenv("KEY_PASSWORD"))
         } else {
             // load from local file
             val localPropertiesFile = rootProject.file("local.properties")
